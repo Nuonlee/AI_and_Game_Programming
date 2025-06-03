@@ -4,30 +4,36 @@ using UnityEngine;
 
 public class Player1 : MonoBehaviour
 {
-    [SerializeField]
-    GameObject sword;
-    [SerializeField]
-    GameObject swordOnShoulder;
+    public GameObject sword;
+    public GameObject swordOnShoulder;
+    public Player2 player2;
+    public GameObject attackPoint1;
+    public GameObject attackPoint2;
+    public GameObject attackPoint3;
 
     public float speed;
+    public float maxHealth;
+    public float curHealth;
+
+    public float damage1;
+    public float damage2;
+    public float damage3;
 
     float hAxis;
     float vAxis;
     bool eDown;
     bool aDown;
     bool bDown;
-    bool kDown;
     bool dDown;
 
     bool isEquipping;
     bool isEquipped;
     bool isAttack;
     bool isBlock;
-    bool isKick;
     bool isDodge;
 
     float timeSinceAttack;
-    int currentAttack = 0;
+    public int currentAttack = 0;
 
     Vector3 moveVec;
     Vector3 dodgeVec;
@@ -51,8 +57,68 @@ public class Player1 : MonoBehaviour
         Equip();
         Attack();
         Block();
-        Kick();
         Dodge();
+    }
+
+    // ------------------------------------------------ public
+    public void ApplyDamage1()
+    {
+        attackPoint1.SetActive(true);
+    }
+
+    void DisableCollider1()
+    {
+        attackPoint1.SetActive(false);
+    }
+
+    public void ApplyDamage2()
+    {
+        attackPoint2.SetActive(true);
+    }
+
+    void DisableCollider2()
+    {
+        attackPoint2.SetActive(false);
+    }
+
+    public void ApplyDamage3()
+    {
+        attackPoint3.SetActive(true);
+    }
+
+    void DisableCollider3()
+    {
+        attackPoint3.SetActive(false);
+    }
+
+    public void TakeDamage()
+    {
+        if (!isBlock && !isDodge)
+        {
+            switch (player2.currentAttack)
+            {
+                case 1:
+                    curHealth -= player2.damage1;
+                    break;
+                case 2:
+                    curHealth -= player2.damage2;
+                    break;
+                case 3:
+                    curHealth -= player2.damage3;
+                    break;
+            }
+
+            if (curHealth <= 0)
+            {
+                curHealth = 0;
+                Die();
+            }
+        }
+    }
+
+    void Die()
+    {
+        Debug.Log("Player1 died!");
     }
 
     // ------------------------------------------------ Update()
@@ -67,15 +133,13 @@ public class Player1 : MonoBehaviour
         aDown = Input.GetButtonDown("Attack1");
         // E key -> 움직이고 있지 않을 때 방패 장착
         bDown = Input.GetButton("Block1");
-        // Z key -> 움직이고 있지 않을 때 발차기
-        kDown = Input.GetButton("Kick1");
         // Left Shift Key -> 움직이고 있을 때 그 방향으로 회피
         dDown = Input.GetButtonDown("Dodge1");
     }
 
     void Move()
     {
-        if (isEquipping || isBlock || isKick || isAttack)
+        if (isEquipping || isBlock || isAttack)
         {
             return;
         }
@@ -178,20 +242,6 @@ public class Player1 : MonoBehaviour
         {
             anim.SetBool("isBlock", false);
             isBlock = false;
-        }
-    }
-
-    void Kick()
-    {
-        if (kDown && moveVec == Vector3.zero)
-        {
-            anim.SetBool("isKick", true);
-            isKick = true;
-        }
-        else
-        {
-            anim.SetBool("isKick", false);
-            isKick = false;
         }
     }
 
