@@ -6,10 +6,11 @@ public class Player1 : MonoBehaviour
 {
     public GameObject sword;
     public GameObject swordOnShoulder;
-    public Player2 player2;
     public GameObject attackPoint1;
     public GameObject attackPoint2;
     public GameObject attackPoint3;
+    public Player2 player2;
+    public GameManager gameManager;
 
     public float speed;
     public float maxHealth;
@@ -29,8 +30,16 @@ public class Player1 : MonoBehaviour
     bool isEquipping;
     bool isEquipped;
     bool isAttack;
+    bool isAttackCount;
     bool isBlock;
+    bool isBlockCount;
     bool isDodge;
+    bool isDamage;
+    public bool isDead;
+
+    public bool canAttack;
+    public bool canBlock;
+    public bool canDodge;
 
     float timeSinceAttack;
     public int currentAttack = 0;
@@ -40,16 +49,27 @@ public class Player1 : MonoBehaviour
 
     Rigidbody rigid;
     Animator anim;
+    CapsuleCollider capsuleCollider;
+    BoxCollider boxCollider;
 
     void Awake()
     {
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
+        capsuleCollider = GetComponent<CapsuleCollider>();
+        boxCollider = GetComponent<BoxCollider>();
     }
 
     void Update()
     {
-        timeSinceAttack += Time.deltaTime;
+        if (isAttackCount)
+        {
+            timeSinceAttack += Time.deltaTime;
+        }
+        else
+        {
+            timeSinceAttack = 0;
+        }
 
         GetInput();
         Move();
@@ -60,51 +80,79 @@ public class Player1 : MonoBehaviour
         Dodge();
     }
 
-    // ------------------------------------------------ public
-    public void ApplyDamage1()
+    // ------------------------------------------------ functions
+    public void ApplyDamage11()
     {
         attackPoint1.SetActive(true);
     }
 
-    void DisableCollider1()
+    void DisableCollider11()
     {
         attackPoint1.SetActive(false);
     }
 
-    public void ApplyDamage2()
+    public void ApplyDamage12()
     {
         attackPoint2.SetActive(true);
     }
 
-    void DisableCollider2()
+    void DisableCollider12()
     {
         attackPoint2.SetActive(false);
     }
 
-    public void ApplyDamage3()
+    public void ApplyDamage13()
     {
         attackPoint3.SetActive(true);
     }
 
-    void DisableCollider3()
+    void DisableCollider13()
     {
         attackPoint3.SetActive(false);
     }
 
     public void TakeDamage()
     {
-        if (!isBlock && !isDodge)
+        if (!isDodge && !isDead)
         {
+            isDamage = true;
+
+            if (!isBlock)
+            {
+                anim.SetTrigger("doDamage");
+            }
+
             switch (player2.currentAttack)
             {
                 case 1:
-                    curHealth -= player2.damage1;
-                    break;
+                    if (isBlock)
+                    {
+                        curHealth -= player2.damage1 / 10;
+                    }
+                    else
+                    {
+                        curHealth -= player2.damage1;
+                    }
+                        break;
                 case 2:
-                    curHealth -= player2.damage2;
+                    if (isBlock)
+                    {
+                        curHealth -= player2.damage2 / 10;
+                    }
+                    else
+                    {
+                        curHealth -= player2.damage2;
+                    }
                     break;
                 case 3:
-                    curHealth -= player2.damage3;
+                    if (isBlock)
+                    {
+                        curHealth -= player2.damage3 / 10;
+                    }
+                    else
+                    {
+                        curHealth -= player2.damage3;
+                    }
                     break;
             }
 
@@ -113,12 +161,35 @@ public class Player1 : MonoBehaviour
                 curHealth = 0;
                 Die();
             }
+
+            Invoke("DamageOut", 0.5f);
+        }
+    }
+
+    void DamageOut()
+    {
+        isDamage = false;
+
+        if (isAttack)
+        {
+            isAttack = false;
+            currentAttack = 0;
+            gameManager.attack1Cool = 2.5f;
+            gameManager.combo1Txt.gameObject.SetActive(false);
         }
     }
 
     void Die()
     {
-        Debug.Log("Player1 died!");
+        anim.SetTrigger("doDie");
+        isDead = true;
+        gameManager.Result();
+    }
+
+    public void SwitchColliders1()
+    {
+        capsuleCollider.enabled = false;
+        boxCollider.enabled = true;
     }
 
     // ------------------------------------------------ Update()
@@ -139,7 +210,7 @@ public class Player1 : MonoBehaviour
 
     void Move()
     {
-        if (isEquipping || isBlock || isAttack)
+        if (isEquipping || isBlock || isAttack || isDead)
         {
             return;
         }
@@ -164,7 +235,7 @@ public class Player1 : MonoBehaviour
 
     void Equip()
     {
-        if (eDown && moveVec == Vector3.zero)
+        if (eDown && !bDown && moveVec == Vector3.zero)
         {
             isEquipping = true;
             anim.SetTrigger("doEquip");
@@ -195,33 +266,42 @@ public class Player1 : MonoBehaviour
 
     void Attack()
     {
-        if (aDown && moveVec == Vector3.zero && timeSinceAttack > 0.8f)
+        if (aDown && !bDown && !dDown && canAttack && moveVec == Vector3.zero && (!isAttackCount || timeSinceAttack > 0.8f))
         {
-            if (!isEquipped)
+            if (!isEquipped || isEquipping || isDead)
             {
                 return;
             }
 
             currentAttack++;
             isAttack = true;
+            isAttackCount = true;
+            gameManager.combo1Txt.gameObject.SetActive(true);
 
             // 최대 3콤보
             if (currentAttack > 3)
             {
-                currentAttack = 1;
+                currentAttack = 0;
+                gameManager.attack1Cool = 2.5f;
+                isAttackCount = false;
+                gameManager.combo1Txt.gameObject.SetActive(false);
             }
-
-            // 콤보 리셋
-            if (timeSinceAttack > 1.0f)
+            else
             {
-                currentAttack = 1;
+                // 콤보에 따른 다른 애니메이션
+                anim.SetTrigger("doAttack" + currentAttack);
             }
-
-            // 콤보에 따른 다른 애니메이션
-            anim.SetTrigger("doAttack" + currentAttack);
 
             // 타이머 리셋
             timeSinceAttack = 0;
+        }
+
+        if (timeSinceAttack > 1.0f)
+        {
+            currentAttack = 0;
+            gameManager.attack1Cool = 2.5f;
+            isAttackCount = false;
+            gameManager.combo1Txt.gameObject.SetActive(false);
         }
     }
 
@@ -233,21 +313,34 @@ public class Player1 : MonoBehaviour
 
     void Block()
     {
-        if (bDown && moveVec == Vector3.zero)
+        if (bDown && !aDown && !dDown && canBlock && moveVec == Vector3.zero)
         {
+            if (isEquipping || isDead)
+            {
+                return;
+            }
+
             anim.SetBool("isBlock", true);
             isBlock = true;
+            isBlockCount = true;
+            gameManager.blocking1Txt.gameObject.SetActive(true);
         }
         else
         {
             anim.SetBool("isBlock", false);
             isBlock = false;
+            gameManager.blocking1Txt.gameObject.SetActive(false);
+            if (isBlockCount && !bDown)
+            {
+                gameManager.block1Cool = 2.5f;
+                isBlockCount = false;
+            }
         }
     }
 
     void Dodge()
     {
-        if (dDown && !isDodge && moveVec != Vector3.zero)
+        if (dDown && canDodge && !isDodge && moveVec != Vector3.zero)
         {
             dodgeVec = moveVec;
             speed *= 2;
@@ -261,6 +354,7 @@ public class Player1 : MonoBehaviour
 
     void DodgeOut()
     {
+        gameManager.dodge1Cool = 5.0f;
         speed *= 0.5f;
         isDodge = false;
     }
