@@ -235,7 +235,7 @@ public class Player2 : MonoBehaviour
 
     void Equip()
     {
-        if (eDown && !bDown && moveVec == Vector3.zero)
+        if (eDown && !isBlock && moveVec == Vector3.zero)
         {
             isEquipping = true;
             anim.SetTrigger("doEquip");
@@ -266,7 +266,7 @@ public class Player2 : MonoBehaviour
 
     void Attack()
     {
-        if (aDown && !bDown && !dDown && canAttack && moveVec == Vector3.zero && (!isAttackCount || timeSinceAttack > 0.8f))
+        if (aDown && !isBlock && canAttack && moveVec == Vector3.zero && (!isAttackCount || timeSinceAttack > 0.8f))
         {
             if (!isEquipped || isEquipping || isDead)
             {
@@ -313,7 +313,7 @@ public class Player2 : MonoBehaviour
 
     void Block()
     {
-        if (bDown && !aDown && !dDown && canBlock && moveVec == Vector3.zero)
+        if (bDown && !isAttack && canBlock && moveVec == Vector3.zero)
         {
             if (isEquipping || isDead)
             {

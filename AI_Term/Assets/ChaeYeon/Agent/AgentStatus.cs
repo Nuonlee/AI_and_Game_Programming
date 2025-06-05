@@ -15,9 +15,9 @@ public class AgentStatus : MonoBehaviour
     public float defendCooldown = 2.5f;
     public float dodgeCooldown = 5f;
 
-    private float lastAttackTime;
-    private float lastDefendTime;
-    private float lastDodgeTime;
+    public float lastAttackTime;
+    public float lastDefendTime;
+    public float lastDodgeTime;
 
     [Header("Invincibility")]
     public bool isInvincible = false;
