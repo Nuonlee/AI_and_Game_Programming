@@ -7,6 +7,7 @@ public class CharacterAction : MonoBehaviour
     public AgentStatus agentStatus;
     [SerializeField] GameObject sword;
     [SerializeField] GameObject swordOnShoulder;
+    [SerializeField] Collider swordCollider;
 
     [Header("Movement")]
     public float speed = 5f;
@@ -17,15 +18,27 @@ public class CharacterAction : MonoBehaviour
     private Rigidbody rigid;
     private Animator anim;
 
+    [Header("Flag")]
+    public bool DidBlockSuccessfully { get; set; }
+    public bool isAttacking = false;
     private bool isMoving = false;
     private bool isEquipping = false;
     private bool isEquipped = false;
-    private bool isAttacking = false;
     private bool isDefending = false;
-    private bool isKicking = false;
     private bool isDodging = false;
 
     private int currentAttack = 0;
+
+
+    public void OnBlockSuccess()
+    {
+        DidBlockSuccessfully = true;
+    }
+
+    public void ResetBlockStatus()
+    {
+        DidBlockSuccessfully = false;
+    }
 
     void Awake()
     {
@@ -38,16 +51,26 @@ public class CharacterAction : MonoBehaviour
     public void Move(Vector3 direction)
     {
         if (!IsAlive()) return;
-        if (isEquipping || isDefending || isKicking || isAttacking) return;
+        if (isEquipping || isDefending || isAttacking || isDodging) return;
 
-        isMoving = true;
-        moveVec = direction.normalized;
+        Vector3 normalizedDir = direction.normalized;
 
-        if (isDodging) moveVec = dodgeVec;
+        if (isDodging)
+            normalizedDir = dodgeVec;
 
-        transform.position += moveVec * speed * Time.deltaTime;
-        anim.SetBool("isMove", moveVec != Vector3.zero);
+        // 위치 이동
+        transform.position += normalizedDir * speed * Time.deltaTime;
 
+        // moveVec이 바뀐 경우에만 SetBool 호출
+        if (!isMoving || moveVec != normalizedDir)
+        {
+            anim.SetBool("isMove", true);
+            isMoving = true;
+        }
+
+        moveVec = normalizedDir;
+
+        // 회전
         if (moveVec != Vector3.zero)
             transform.LookAt(transform.position + moveVec);
     }
@@ -55,18 +78,10 @@ public class CharacterAction : MonoBehaviour
 
     public void StopMove()
     {
-        isMoving = false;
         anim.SetBool("isMove", false);
-        moveVec = Vector3.zero;
-
+        isMoving = false;
     }
 
-
-    public void MoveAwayFrom(Vector3 enemyPos, float duration = 1f)
-    {
-        if (isMoving) return;
-        StartCoroutine(MoveAwayCoroutine(enemyPos, duration));
-    }
 
     private IEnumerator MoveAwayCoroutine(Vector3 enemyPos, float duration)
     {
@@ -82,6 +97,7 @@ public class CharacterAction : MonoBehaviour
             yield return null;
         }
 
+        TurnTo(enemyPos);
         isMoving = false;
     }
 
@@ -101,7 +117,7 @@ public class CharacterAction : MonoBehaviour
     {
         if (!IsAlive()) return;
 
-        if (isEquipping || isAttacking || isDefending || isKicking || isDodging)
+        if (isEquipping || isAttacking || isDodging)
             return;
 
         if (moveVec != Vector3.zero)
@@ -113,7 +129,6 @@ public class CharacterAction : MonoBehaviour
 
     public void ToggleWeapon()  // Animation Event용
     {
-        Debug.Log("▶ ToggleWeapon 호출됨");
         if (!isEquipped)
         {
             sword.SetActive(true);
@@ -137,37 +152,30 @@ public class CharacterAction : MonoBehaviour
 
     public bool TryAttack()
     {
-        StopMove();
+        //StopMove();
 
-        if (!IsAlive())
+        if (!IsAlive() || isEquipping || isDefending || isDodging || isAttacking)
         {
+            Debug.Log("❌ AttackAction: 공격 실패 - 아니면 isDefending ??????" + isDefending);
             return false;
         }
 
-        if (!isEquipped)
-        {
-            return false;
-        }
 
         if (!agentStatus.CanAttack())
         {
+            Debug.Log("❌ AttackAction: 공격 실패 - CanAttack ??????");
             return false;
         }
 
-        // 🥾 랜덤 발차기 (20% 확률)
-        if (Random.value < 0.2f)
-        {
-            return KickAttack();
-        }
-
-        // ⚔️ 기존 칼 공격
+        swordCollider.enabled = true;
         currentAttack++;
 
-        if (currentAttack > 3)
-            currentAttack = 1;
+        currentAttack = 1;
+        //if (currentAttack > 3)
+        //    currentAttack = 1;
 
-        if (Time.time - GetLastAttackTime() > 1.0f)
-            currentAttack = 1;
+        //if (Time.time - GetLastAttackTime() > 1.0f)
+        //    currentAttack = 1;
 
         anim.SetTrigger("doAttack" + currentAttack);
         isAttacking = true;
@@ -175,35 +183,45 @@ public class CharacterAction : MonoBehaviour
         return true;
     }
 
-    // ---------- Kick Attack ----------
-
-    public bool KickAttack()
+    public void TryComboAttack()
     {
+        float comboChance = 0.3f; // 30% 확률
 
-        if (!IsAlive() || isKicking)
-            return false;
-
-        isKicking = true;
-        anim.SetBool("isKick", true);
-        agentStatus.UseAttack();
-
-        return true;
+        if (Random.value < comboChance)
+        {
+            isAttacking = true;
+            anim.SetTrigger("doAttack" + 3);
+            agentStatus.UseAttack();
+        }
+        else
+            ResetAttack1();
     }
 
-    private void EndKick() // Animation Event
+
+
+    public void CounterAttack()  // 수비 에이전트 반격용
     {
-        isKicking = false;
-        anim.SetBool("isKick", false);
+       // StopMove();
+
+        if (!IsAlive() || isEquipping || isDodging)
+        {
+            Debug.Log("💥 isDefending?");
+            return;
+        }
+
+        swordCollider.enabled = true;
+
+        anim.SetTrigger("doAttack" + 2);
+        isAttacking = true;
+
     }
 
-    public void ResetAttack()  // Animation Event
+
+    public void ResetAttack1()  // Animation Event
     {
         isAttacking = false;
+      //  swordCollider.enabled = false;
     }
-
-    public void ResetAttack1() => ResetAttack();
-    public void ResetAttack2() => ResetAttack();
-    public void ResetAttack3() => ResetAttack();
 
 
 
@@ -211,12 +229,7 @@ public class CharacterAction : MonoBehaviour
 
     public bool TryDefend()
     {
-        if (!IsAlive())
-        {
-            return false;
-        }
-
-        if (isMoving)
+        if ( !IsAlive() || isDodging || isMoving || isAttacking || isDefending)
         {
             return false;
         }
@@ -231,6 +244,8 @@ public class CharacterAction : MonoBehaviour
         anim.SetTrigger("doBlock");
         agentStatus.UseDefend();
 
+        Invoke(nameof(ResetDefend), 0.5f);
+
         return true;
     }
 
@@ -238,6 +253,7 @@ public class CharacterAction : MonoBehaviour
     public void ResetDefend()  // Animation Event용
     {
         isDefending = false;
+        agentStatus.isDefending = false;
     }
 
 
@@ -269,22 +285,14 @@ public class CharacterAction : MonoBehaviour
     }
 
 
-    // ---------- Kick ----------
-
-
-    public void Kick(bool isOn)
-    {
-        if (!IsAlive()) return;
-
-        isKicking = isOn;
-        anim.SetBool("isKick", isOn);
-    }
 
     // ---------- Dodge ----------
 
     public bool TryDodge(Vector3 direction)
     {
-        if (!IsAlive() || isDodging || !agentStatus.CanDodge())
+        Debug.Log($"[TryDodge] 상태 체크 → isAttacking: {isAttacking}, isDefending: {isDefending}, isDodging: {isDodging}, CanDodge: {agentStatus.CanDodge()}");
+
+        if (!IsAlive() || !agentStatus.CanDodge() || isDodging || isAttacking || isEquipping || isDefending )
             return false;
 
         StartCoroutine(DodgeRoutine(direction));
@@ -294,9 +302,13 @@ public class CharacterAction : MonoBehaviour
     private IEnumerator DodgeRoutine(Vector3 direction)
     {
         isDodging = true;
-        dodgeVec = direction.normalized;
+        
         agentStatus.UseDodge();
         anim.SetTrigger("doDodge");
+
+        Vector3 right = Vector3.Cross(Vector3.up, direction).normalized;
+        Vector3 dodgeDir = Random.value < 0.5f ? right : -right;
+        dodgeVec = dodgeDir.normalized;
 
         float dodgeDuration = 0.5f;
         float elapsed = 0f;
@@ -309,6 +321,7 @@ public class CharacterAction : MonoBehaviour
             yield return null;
         }
 
+        TurnTo(direction);
         isDodging = false;
     }
 
@@ -321,6 +334,5 @@ public class CharacterAction : MonoBehaviour
     public bool IsEquipped() => isEquipped;
     public bool IsAttacking() => isAttacking;
     public bool IsBlocking() => isDefending;
-    public bool IsKicking() => isKicking;
     public bool IsDodging() => isDodging;
 }

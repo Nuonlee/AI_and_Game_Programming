@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System;
 
 public class AgentStatus : MonoBehaviour
@@ -28,9 +28,10 @@ public class AgentStatus : MonoBehaviour
     public bool isBeingAttacked = false;
     public bool isDefending = false;
     public bool isDead = false; 
-    private bool hasDefended = false;
 
     public event Action OnDeath;
+    private BoxCollider deathCol;
+    private Animator anim;
 
     void Start()
     {
@@ -38,6 +39,10 @@ public class AgentStatus : MonoBehaviour
         lastAttackTime = -attackCooldown;
         lastDefendTime = -defendCooldown;
         lastDodgeTime = -dodgeCooldown;
+
+        anim = GetComponent<Animator>();
+        deathCol = GetComponent<BoxCollider>();
+        deathCol.enabled = false;
     }
 
     void Update()
@@ -46,7 +51,7 @@ public class AgentStatus : MonoBehaviour
             isInvincible = false;
     }
 
-    // --------- µ¥¹ÌÁö ¹× Á×À½ ---------
+    // --------- ë°ë¯¸ì§€ ë° ì£½ìŒ ---------
 
     public void TakeDamage(float damage)
     {
@@ -54,18 +59,19 @@ public class AgentStatus : MonoBehaviour
 
         if (isDefending)
         {
+            Debug.Log(this.gameObject.name + " ë°©ì–´í–ˆì–´ìš” ;;;");
             isDefending = false;
-            damage *= 0.2f;
+            damage = 0f;
+            GetComponent<CharacterAction>().DidBlockSuccessfully = true;
         }
            
-
         currentHealth -= damage;
         currentHealth = Mathf.Clamp(currentHealth, 0f, maxHealth);
 
-        // Ãß°¡
+        // ì¶”ê°€
         isBeingAttacked = true;
-        CancelInvoke(nameof(ResetAttacked)); // Áßº¹ ¹æÁö
-        Invoke(nameof(ResetAttacked), 0.5f);  // À¯Áö½Ã°£ Á¶Àı °¡´É
+        CancelInvoke(nameof(ResetAttacked)); // ì¤‘ë³µ ë°©ì§€
+        Invoke(nameof(ResetAttacked), 0.5f);  // ìœ ì§€ì‹œê°„ ì¡°ì ˆ ê°€ëŠ¥
 
         if (currentHealth <= 0f)
             Die();
@@ -85,26 +91,25 @@ public class AgentStatus : MonoBehaviour
 
         Animator animator = GetComponent<Animator>();
         if (animator != null)
-            animator.SetTrigger("Die");
+            animator.SetTrigger("doDie");
 
         BTAgentBase agent = GetComponent<BTAgentBase>();
         if (agent != null)
             agent.OnDeath();
 
-        Rigidbody rb = GetComponent<Rigidbody>();
-        if (rb != null)
-            rb.velocity = Vector3.zero;
-
-        Collider col = GetComponent<Collider>();
-        if (col != null)
-            col.enabled = false;
-
         OnDeath?.Invoke();
-
-        Destroy(gameObject, 3f);
     }
 
-    // --------- ¹«Àû ---------
+    public void DieAnim()
+    {
+        Collider col = GetComponent<CapsuleCollider>();
+        if (col != null)
+            col.enabled = false;
+        deathCol.enabled = true;
+
+    }
+
+    // --------- ë¬´ì  ---------
 
     public void StartInvincibility()
     {
@@ -112,7 +117,7 @@ public class AgentStatus : MonoBehaviour
         invincibleEndTime = Time.time + invincibilityDuration;
     }
 
-    // --------- ÄğÅ¸ÀÓ Ã¼Å© ---------
+    // --------- ì¿¨íƒ€ì„ ì²´í¬ ---------
 
     public bool CanAttack() => Time.time >= lastAttackTime + attackCooldown;
     public bool CanDefend() => Time.time >= lastDefendTime + defendCooldown;
@@ -120,6 +125,7 @@ public class AgentStatus : MonoBehaviour
 
     public void UseAttack() => lastAttackTime = Time.time;
     public void UseDefend() => lastDefendTime = Time.time;
+
     public void UseDodge()
     {
         lastDodgeTime = Time.time;
@@ -128,19 +134,23 @@ public class AgentStatus : MonoBehaviour
 
     public float GetLastAttackTime() => lastAttackTime;
 
-    // --------- »óÅÂ È®ÀÎ ---------
+    // --------- ìƒíƒœ í™•ì¸ ---------
 
     public bool IsAlive() => !isDead && currentHealth > 0f;
 
-    // --------- ÇÇ°İ °¨Áö ---------
+    // --------- í”¼ê²© ê°ì§€ ---------
 
     void OnTriggerEnter(Collider other)
     {
+
         if (other.CompareTag("Attack"))
         {
             isBeingAttacked = true;
             Invoke(nameof(ResetAttacked), 0.5f);
-            TakeDamage(attackDamage);
+
+            if (other.transform.root != this.transform)
+                TakeDamage(attackDamage);
+          
         }
     }
 

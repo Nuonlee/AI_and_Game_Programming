@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using System.Collections.Generic;
 
 public class BTAgent_Attack : BTAgentBase
@@ -9,38 +9,63 @@ public class BTAgent_Attack : BTAgentBase
     {
         character = GetComponent<CharacterAction>();
         character.EquipWeapon();
-        float attackRange = 1.8f;
+        float attackRange = 1.75f;
+        float chaseRange = 1.7f;
+        float dashRange = 5f;
 
-        // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ Á¶°Ç ³ëµå ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì¡°ê±´ ë…¸ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         var isLowHP = new IsLowHealth(character, 30f);
         var isEnemyInAttackRange = new IsEnemyInRange(character, character.transform, enemy, attackRange);
         var canAttack = new CanAttack(character);
+        var canDefend = new CanDefend(character);
         var canDodge = new CanDodge(character);
-        var isEnemyFar = new IsEnemyOutOfRange(character, character.transform, enemy, attackRange);
+        var isEnemyFar = new IsEnemyOutOfRange(character, character.transform, enemy, chaseRange);
+        var isEnemyTooFar = new IsEnemyOutOfRange(character, character.transform, enemy, dashRange);
 
-        // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ Çàµ¿ ³ëµå ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ í–‰ë™ ë…¸ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        var defend = new DefendAction(character, enemy);
         var attack = new AttackAction(character, enemy);
         var dodge = new DodgeAction(character, character.transform, enemy);
         var moveToEnemy = new MoveToEnemy(character, character.transform, enemy, attackRange);
-        var dashToPlayer = new DashAction(character, character.transform, enemy, 5f);
-        var wait = new WaitAction(0.5f);  // °ø°İÀÌ ¾È µÇ°Å³ª ¸ØÃèÀ» ¶§ »ìÂ¦ ½°
+        var dashToPlayer = new DashAction(character, character.transform, enemy, 7f);
+  
 
-        // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ½ÃÄö½º ³ëµå ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-        var dodgeSeq = new Sequence(new List<Node> { isLowHP, canDodge, dodge });
-        var attackSeq = new Sequence(new List<Node> { isEnemyInAttackRange, canAttack, attack });
-        var chaseSeq = new Sequence(new List<Node> { isEnemyFar, moveToEnemy });
-        var dashSeq = new Sequence(new List<Node> { isEnemyFar, dashToPlayer });
-
-        // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ Æ®¸® ±¸¼º ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-        root = new Selector(new List<Node> {
-            attackSeq,
-            dashSeq,
-            chaseSeq,
-           // dodgeSeq,
-         //   wait
+        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì‹œí€€ìŠ¤ ë…¸ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        var attackSeq = new Sequence(new List<Node> {
+            isEnemyInAttackRange,
+            canAttack,
+            attack
         });
 
-        Debug.Log("[BTAgent_Attack] Æ®¸® ±¸¼º ¿Ï·á");
+        var chaseSeq = new Sequence(new List<Node> {
+            isEnemyFar,
+            moveToEnemy
+        });
+
+        var dashSeq = new Sequence(new List<Node> {
+            isEnemyTooFar,
+            dashToPlayer
+        });
+
+        var defendSeq = new Sequence(new List<Node> {
+            isLowHP,
+            canDefend,
+            defend
+        });
+
+        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ íŠ¸ë¦¬ êµ¬ì„± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+        root = new Sequence(new List<Node> {
+            new IsEnemyAlive(enemy),   // ì ì´ ì£½ì—ˆì„ ê²½ìš° ë°‘ì˜ í–‰ë™ ë…¸ë“œ ì‹¤í–‰ ì•ˆ ë¨
+            new Selector(new List<Node> {
+                attackSeq,
+                defendSeq,
+                dashSeq,
+                chaseSeq,
+            })
+        });
+
+        Debug.Log("[BTAgent_Attack] íŠ¸ë¦¬ êµ¬ì„± ì™„ë£Œ");
     }
 
     public override void OnDeath()

@@ -22,14 +22,14 @@ public class MoveToEnemy : Node
 
         float distance = Vector3.Distance(self.position, enemy.position);
 
+        Vector3 direction = (enemy.position - self.position).normalized;
+        character.Move(direction);
+
         if (distance <= stopDistance)
         {
             character.StopMove();
             return NodeState.Success;
         }
-
-        Vector3 direction = (enemy.position - self.position).normalized;
-        character.Move(direction);
         return NodeState.Running;
     }
 }

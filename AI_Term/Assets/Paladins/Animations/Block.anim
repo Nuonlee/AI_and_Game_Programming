@@ -27524,11 +27524,4 @@ AnimationClip:
   m_EulerEditorCurves: []
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
-  m_Events:
-  - time: 1.4
-    functionName: ResetDefend
-    data: 
-    objectReferenceParameter: {fileID: 11500000, guid: 18d8be6fc24d1754a9e5328233477952, type: 3}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
+  m_Events: []

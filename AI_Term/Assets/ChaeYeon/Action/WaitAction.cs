@@ -25,6 +25,7 @@ public class WaitAction : Node
             return NodeState.Success;
         }
 
+        Debug.Log("▶ WaitAction: 공격 성공");
         return NodeState.Running;
     }
 }

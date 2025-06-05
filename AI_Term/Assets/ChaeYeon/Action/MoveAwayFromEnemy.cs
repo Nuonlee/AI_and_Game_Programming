@@ -7,7 +7,7 @@ public class MoveAwayFromEnemyAction : Node
     private Transform enemy;
     private float escapeDistance;
 
-    public MoveAwayFromEnemyAction(CharacterAction character, Transform self, Transform enemy, float escapeDistance = 6f)
+    public MoveAwayFromEnemyAction(CharacterAction character, Transform self, Transform enemy, float escapeDistance = 4f)
     {
         this.character = character;
         this.self = self;
