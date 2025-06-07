@@ -10,6 +10,7 @@ public class RL_Agent : Agent
     public RL_Agent opponentAgent;           // 상대 에이전트
     public Rigidbody rb;
     public CharacterAction character;
+    public Transform StartLocation;
 
     public float moveSpeed = 2f;
     public float attackRange = 2f;
@@ -21,17 +22,24 @@ public class RL_Agent : Agent
 
     public override void Initialize()
     {
+
         rb = GetComponent<Rigidbody>();
         character = GetComponent<CharacterAction>();
     }
 
     public override void OnEpisodeBegin()
     {
+
         // 내 위치 초기화
-        this.transform.localPosition = new Vector3(-2f, 0.5f, 0);
+        this.transform.localPosition = StartLocation.position;
         rb.velocity = Vector3.zero;
         character.agentStatus.ResetStatus();
         rewardGiven = false;
+
+        if (!character.IsEquipped())
+        {
+            character.EquipWeapon(); // 애니메이션이 있다면 이후 무기를 꺼내는 Animation Event 필수
+        }
 
         // 상대 위치 초기화
         if (opponentAgent != null)
@@ -92,10 +100,10 @@ public class RL_Agent : Agent
         Vector3 dir = Vector3.zero;
         switch (move)
         {
-            case 1: dir = Vector3.forward; break;
-            case 2: dir = Vector3.back; break;
-            case 3: dir = Vector3.left; break;
-            case 4: dir = Vector3.right; break;
+            case 1: dir = Vector3.forward; SetReward(role == AgentRole.Attacker ? +0.1f : +0.05f); break;
+            case 2: dir = Vector3.back; SetReward(role == AgentRole.Attacker ? +0.1f : +0.05f); break;
+            case 3: dir = Vector3.left; SetReward(role == AgentRole.Attacker ? +0.1f : +0.05f); break;
+            case 4: dir = Vector3.right; SetReward(role == AgentRole.Attacker ? +0.1f : +0.05f); break;
         }
         character.Move(dir);
 
@@ -124,6 +132,8 @@ public class RL_Agent : Agent
                 }
                 break;
         }
+
+
 
         if (!character.IsAlive() && !rewardGiven)
         {
