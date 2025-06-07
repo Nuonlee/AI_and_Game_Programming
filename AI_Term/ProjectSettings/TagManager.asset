@@ -6,11 +6,12 @@ TagManager:
   tags:
   - Player1
   - Player2
+  - Attack
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Weapon
   - Water
   - UI
   - 

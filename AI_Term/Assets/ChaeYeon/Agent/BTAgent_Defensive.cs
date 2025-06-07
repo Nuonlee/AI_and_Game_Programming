@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class BTAgent_Defensive : BTAgentBase
@@ -10,36 +10,41 @@ public class BTAgent_Defensive : BTAgentBase
         character = GetComponent<CharacterAction>();
         character.EquipWeapon();
 
-
-        // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ Á¶°Ç ³ëµå ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+        float attackRange = 1.75f;
+        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì¡°ê±´ ë…¸ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         var isLowHP = new IsLowHealth(character, 30f);
         var canAttack = new CanAttack(character);
         var canDefend = new CanDefend(character);
         var canDodge = new CanDodge(character);
-        var isEnemyClose = new IsEnemyInRange(character, character.transform, enemy, 1.8f);
+        var isEnemyClose = new IsEnemyInRange(character, character.transform, enemy, attackRange);
         var isEnemyNotFar = new IsEnemyInRange(character, character.transform, enemy, 6f);
+        var isEnemyAttacking = new IsEnemyAttacking(enemy); // ì êµ°ì´ ê³µê²©ì¤‘ì¼ ê²½ìš°
+        var wasBlockSuccessful = new WasBlockSuccessful(character);
 
-        // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ Çàµ¿ ³ëµå ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ í–‰ë™ ë…¸ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         var defend = new DefendAction(character, enemy);
         var dodge = new DodgeAction(character, character.transform, enemy);
         var moveAway = new MoveAwayFromEnemyAction(character, character.transform, enemy);
-        var counterAttack = new AttackAction(character,enemy);
+        var counterAttack = new CounterAttackAction(character, enemy, 0.5f);
+        var resetBlockStatus = new ResetDefendAction(character);
 
-        // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ½ÃÄö½º ³ëµå ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-        var defendSeq = new Sequence(new List<Node> { isEnemyClose, canDefend, defend });
-        var dodgeSeq = new Sequence(new List<Node> { isEnemyClose, canDodge, dodge });
-        var counterSeq = new Sequence(new List<Node> { isEnemyClose, canAttack, counterAttack });
-        var moveAwaySeq = new Sequence(new List<Node> { isLowHP, isEnemyNotFar, moveAway });
+        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ì‹œí€€ìŠ¤ ë…¸ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        var defendSeq = new Sequence(new List<Node> { isEnemyClose, canDefend, isEnemyAttacking, defend }); // ì ì´ ê°€ê¹Œì›€ + Defend ê°€ëŠ¥ + ì ì´ ê³µê²©ì¤‘ì¼ ê²½ìš°
+        var counterSeq = new Sequence(new List<Node> { wasBlockSuccessful, counterAttack, resetBlockStatus }); // ì ì´ ê°€ê¹Œì›€ + ê³µê²© ê°€ëŠ¥í•  ê²½ìš°
+        var dodgeSeq = new Sequence(new List<Node> { isEnemyClose, canDodge, dodge });  // ì ì´ ê°€ê¹Œì›€ +  Dodge ê°€ëŠ¥í•  ê²½ìš°
 
-        // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡ ÃÖÁ¾ Æ®¸® ±¸¼º ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-        root = new Selector(new List<Node> {
-            moveAwaySeq,   // °¡±î¿ï ¶§¸¸ µµ¸Á
-            defendSeq,
-            dodgeSeq,
-            counterSeq,    
+        // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ ìµœì¢… íŠ¸ë¦¬ êµ¬ì„± â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+        root = new Sequence(new List<Node> {
+            new IsEnemyAlive(enemy),   // ì ì´ ì£½ì—ˆì„ ê²½ìš° ë°‘ì˜ í–‰ë™ ë…¸ë“œ ì‹¤í–‰ ì•ˆ ë¨
+            new Selector(new List<Node> {
+                defendSeq,
+                counterSeq,
+                dodgeSeq,
+            })
         });
 
-        Debug.Log("[BTAgent_Defensive] Æ®¸® ±¸¼º ¿Ï·á");
+        Debug.Log("[BTAgent_Defensive] íŠ¸ë¦¬ êµ¬ì„± ì™„ë£Œ");
     }
 
     void Update()

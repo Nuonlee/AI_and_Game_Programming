@@ -18,12 +18,11 @@ public class DodgeAction : Node
             return NodeState.Failure;
 
         // 방향 계산
-        Vector3 toEnemy = (enemy.position - self.position).normalized;
-        Vector3 right = Vector3.Cross(Vector3.up, toEnemy).normalized;
-        Vector3 dodgeDir = Random.value < 0.5f ? right : -right;
+        Vector3 enemyDir = (enemy.position - self.position).normalized;
+        
 
         // 구르기 시도
-        bool success = character.TryDodge(dodgeDir);
+        bool success = character.TryDodge(enemyDir);
 
         if (success)
         {

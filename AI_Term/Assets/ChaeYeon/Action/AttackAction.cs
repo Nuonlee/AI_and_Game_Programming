@@ -22,6 +22,8 @@ public class AttackAction : Node
 
         bool success = character.TryAttack();
 
+        Debug.Log($"[AttackAction] {character.name} attacks {enemy.name}");
+
         if (success)
         {
             Debug.Log("▶ AttackAction: 공격 성공");
