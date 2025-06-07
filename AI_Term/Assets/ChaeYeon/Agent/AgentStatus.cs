@@ -148,19 +148,4 @@ public class AgentStatus : MonoBehaviour
     {
         isBeingAttacked = false;
     }
-    public void ResetStatus()
-    {
-        currentHealth = maxHealth;
-        isDead = false;
-        isInvincible = false;
-        isBeingAttacked = false;
-        isDefending = false;
-
-        lastAttackTime = -attackCooldown;
-        lastDefendTime = -defendCooldown;
-        lastDodgeTime = -dodgeCooldown;
-
-        CancelInvoke();  // ResetAttacked 등 타이머 제거
-    }
-
 }
