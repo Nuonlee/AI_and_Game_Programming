@@ -9,6 +9,7 @@
 /AI_Term/[Bb]uild/
 /AI_Term/[Bb]uilds/
 /AI_Term/[Ll]ogs/
+/AI_Term/[Uu]ser[Ss]ettings/
 *.log
 
 # MemoryCaptures can get excessive in size.
