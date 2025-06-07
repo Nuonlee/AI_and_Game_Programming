@@ -1074,6 +1074,7 @@ GameObject:
   - component: {fileID: 2950097668428118103}
   - component: {fileID: 2528607049704550690}
   - component: {fileID: 4665526475766026460}
+  - component: {fileID: 4325347291328491981}
   m_Layer: 0
   m_Name: Player 1
   m_TagString: Untagged
@@ -1192,8 +1193,10 @@ MonoBehaviour:
   opponentAgent: {fileID: 0}
   rb: {fileID: 5868700999769671885}
   character: {fileID: 0}
+  StartLocation: {fileID: 0}
   moveSpeed: 2
   attackRange: 2
+  role: 1
 --- !u!114 &1992974043820899795
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1209,7 +1212,9 @@ MonoBehaviour:
   agentStatus: {fileID: 2950097668428118103}
   sword: {fileID: 8245696868375482292}
   swordOnShoulder: {fileID: 8956690131547947794}
+  swordCollider: {fileID: 8121987998190480183}
   speed: 5
+  isAttacking: 0
 --- !u!114 &2950097668428118103
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1228,6 +1233,9 @@ MonoBehaviour:
   attackCooldown: 2.5
   defendCooldown: 2.5
   dodgeCooldown: 5
+  lastAttackTime: 0
+  lastDefendTime: 0
+  lastDodgeTime: 0
   isInvincible: 0
   invincibilityDuration: 0.5
   isBeingAttacked: 0
@@ -1279,6 +1287,27 @@ MonoBehaviour:
   DecisionPeriod: 1
   DecisionStep: 0
   TakeActionsBetweenDecisions: 1
+--- !u!65 &4325347291328491981
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2503523354103726620}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2521239946110778516
 GameObject:
   m_ObjectHideFlags: 0

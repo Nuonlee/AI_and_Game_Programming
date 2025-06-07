@@ -156,14 +156,16 @@ public class CharacterAction : MonoBehaviour
 
         if (!IsAlive() || isEquipping || isDefending || isDodging || isAttacking)
         {
-            Debug.Log("❌ AttackAction: 공격 실패 - 아니면 isDefending ??????" + isDefending);
+            //Debug.Log("❌ AttackAction: 공격 실패 - 아니면 isDefending ??????" + isDefending);
+
+    //        Debug.Log("❌ AttackAction: 공격 실패 - 아니면 isattack ??????" + isEquipping);
             return false;
         }
 
 
         if (!agentStatus.CanAttack())
         {
-            Debug.Log("❌ AttackAction: 공격 실패 - CanAttack ??????");
+   //         Debug.Log("❌ AttackAction: 공격 실패 - CanAttack ??????");
             return false;
         }
 
@@ -290,7 +292,7 @@ public class CharacterAction : MonoBehaviour
 
     public bool TryDodge(Vector3 direction)
     {
-        Debug.Log($"[TryDodge] 상태 체크 → isAttacking: {isAttacking}, isDefending: {isDefending}, isDodging: {isDodging}, CanDodge: {agentStatus.CanDodge()}");
+        //Debug.Log($"[TryDodge] 상태 체크 → isAttacking: {isAttacking}, isDefending: {isDefending}, isDodging: {isDodging}, CanDodge: {agentStatus.CanDodge()}");
 
         if (!IsAlive() || !agentStatus.CanDodge() || isDodging || isAttacking || isEquipping || isDefending )
             return false;

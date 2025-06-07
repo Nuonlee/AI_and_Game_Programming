@@ -1,10 +1,22 @@
+environment_parameters:
+  agent_start_x:
+    sampler_type: uniform
+    sampler_parameters:
+      min_value: -2.0
+      max_value: 2.0
+  agent_start_z:
+    sampler_type: uniform
+    sampler_parameters:
+      min_value: -2.0
+      max_value: 2.0
+
 behaviors:
   Player1:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 1024
-      buffer_size: 10240
-      learning_rate: 3.0e-4
+      batch_size: 512
+      buffer_size: 20480
+      learning_rate: 5.0e-4
       beta: 5.0e-4
       epsilon: 0.2
       lambd: 0.95
@@ -16,17 +28,19 @@ behaviors:
       extrinsic:
         gamma: 0.99
         strength: 1.0
-    max_steps: 500000
-    time_horizon: 64
+    max_steps: 3000000
+    time_horizon: 128
     summary_freq: 10000
+    checkpoint_interval: 100000
+    keep_checkpoints: 30
   Player2:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 1024
-      buffer_size: 10240
-      learning_rate: 3.0e-4
+      batch_size: 512
+      buffer_size: 20480
+      learning_rate: 5.0e-4
       beta: 5.0e-4
-      epsilon: 0.2
+      epsilon: 0.1
       lambd: 0.95
       num_epoch: 3
     network_settings:
@@ -36,6 +50,8 @@ behaviors:
       extrinsic:
         gamma: 0.99
         strength: 1.0
-    max_steps: 500000
-    time_horizon: 64
+    max_steps: 3000000
+    time_horizon: 128
     summary_freq: 10000
+    checkpoint_interval: 100000
+    keep_checkpoints: 30
