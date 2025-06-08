@@ -28,17 +28,36 @@ public class CharacterAction : MonoBehaviour
     private bool isDodging = false;
 
     private int currentAttack = 0;
+    private bool successfulAttack = false;
 
 
     public void OnBlockSuccess()
     {
         DidBlockSuccessfully = true;
     }
-
     public void ResetBlockStatus()
     {
         DidBlockSuccessfully = false;
     }
+    public void OnSuccessfulAttack()
+    {
+        successfulAttack = true;
+    }
+
+    public bool WasSuccessfulAttack()
+    {
+        bool result = successfulAttack;
+        successfulAttack = false;  // 리셋
+        return result;
+    }
+    public bool WasSuccessfulBlock()
+    {
+        bool result = DidBlockSuccessfully;
+        DidBlockSuccessfully = false;
+        return result;
+    }
+
+
 
     void Awake()
     {

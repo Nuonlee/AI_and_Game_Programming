@@ -2889,13 +2889,18 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
-  opponentAgent: {fileID: 0}
+  opponentAgent: {fileID: 5260528374873655650, guid: bcebe43ca17fd87488a727d1fe792ff4, type: 3}
   rb: {fileID: 4015478821449929675}
   character: {fileID: 0}
   StartLocation: {fileID: 0}
   moveSpeed: 2
   attackRange: 2
+  attackCooldownTime: 2
+  defendCooldownTime: 2
+  dodgeCooldownTime: 5
+  alive: 1
   role: 1
+  maxEpisodeTime: 60
 --- !u!114 &3612368351428297218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2965,7 +2970,7 @@ MonoBehaviour:
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
   m_BehaviorType: 0
-  m_BehaviorName: RL_Agent
+  m_BehaviorName: MyAgent-v0
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
