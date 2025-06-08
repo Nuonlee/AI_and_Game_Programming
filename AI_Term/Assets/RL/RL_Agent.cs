@@ -13,14 +13,14 @@ public class RL_Agent : Agent
     
     public RL_Agent opponentAgent;
     public Rigidbody rb;
-    public CharacterAction character;
+    public CharacterAction_Re character;
     public Transform StartLocation;
 
     public float moveSpeed = 2f;
     public float attackRange = 2f;
     public float attackCooldownTime = 2f;  // 공격 쿨타임
     public float defendCooldownTime = 2f;  // 방어 쿨타임
-    public float dodgeCooldownTime = 5f;   // 회피 쿨타임
+    public float dodgeCooldownTime = 2f;   // 회피 쿨타임
     private float lastAttackTime = 0f;  // 마지막 공격 시각
     private float lastDefendTime = 0f;  // 마지막 방어 시각
     private float lastDodgeTime = 0f;   // 마지막 회피 시각
@@ -41,9 +41,13 @@ public class RL_Agent : Agent
     private Vector3 prevPosition;
 
     private float equipStartTime;
-    private float timeSinceLastAttackAttempt = 0f;
-    private float farDistanceDuration = 0f;
+    private CharacterAction_Re characterRe;
 
+    private int attackAttempts = 0;
+    private int attackSuccesses = 0;
+    private int defendAttempts = 0;
+    private int defendSuccesses = 0;
+    private int dodgeAttempts = 0;
 
 
     private float lastDistance = 0f;
@@ -52,7 +56,9 @@ public class RL_Agent : Agent
     public override void Initialize()
     {
         rb = GetComponent<Rigidbody>();
-        character = GetComponent<CharacterAction>();
+        character = GetComponent<CharacterAction_Re>();
+        base.Initialize();
+        characterRe = GetComponent<CharacterAction_Re>();
     }
 
     public override void OnEpisodeBegin()
@@ -63,11 +69,31 @@ public class RL_Agent : Agent
         totalReward = 0f;
         rewardGiven = false;
         alive = true;
+        lastAttackTime = 0f;
+        lastDefendTime = 0f;
+        lastDodgeTime = 0f;
+        character.ResetStateFlags();
 
-        prevPosition = transform.position;
-        transform.localPosition = StartLocation.position;
+        attackAttempts = 0;
+        attackSuccesses = 0;
+        defendAttempts = 0;
+        defendSuccesses = 0;
+        dodgeAttempts = 0;
+
+        float x = Academy.Instance.EnvironmentParameters.GetWithDefault("agent_start_x", 0f);
+        float z = Academy.Instance.EnvironmentParameters.GetWithDefault("agent_start_z", 0f);
+        Vector3 randomStartPos = new Vector3(x, 0f, z);
+
+        // ✅ 위치 먼저 세팅
+        transform.position = StartLocation.position + randomStartPos;
         rb.velocity = Vector3.zero;
 
+        prevPosition = transform.position;
+        characterRe.isResetting = true;
+        StartCoroutine(UnlockMoveLater());
+
+
+        // ✅ 캐릭터 상태 초기화
         character.agentStatus.currentHealth = character.agentStatus.maxHealth;
         character.agentStatus.isDead = false;
         character.agentStatus.isDefending = false;
@@ -77,28 +103,25 @@ public class RL_Agent : Agent
         character.StopAllCoroutines();
         character.ResetBlockStatus();
         character.enabled = true;
+
         prevOpponentHealth = opponentAgent.character.agentStatus.currentHealth;
-
-
-        timeSinceLastAttackAttempt = 0f;
-        farDistanceDuration = 0f;
-
-
 
         if (!character.IsEquipped())
         {
+            Debug.Log("Equip");
             character.EquipWeapon();
-            equipStartTime = Time.time;  // ✅ 장착 시각 기록
+            equipStartTime = Time.time;
         }
 
-        // ✅ 애니메이터 상태 초기화
         Animator anim = character.GetComponentInChildren<Animator>();
         if (anim != null)
         {
-            anim.Rebind();   // 트랜지션 초기화
+            anim.Rebind();
             anim.Update(0f);
-            anim.Play("Idle");  // Idle 애니메이션 이름 확인 후 수정
+            anim.Play("Idle");
         }
+
+        // ✅ 상대방 위치 초기화 (상대는 무작위 안 쓰는 걸로 보임)
         if (opponentAgent != null)
         {
             opponentAgent.transform.localPosition = new Vector3(2f, 0.5f, 0f);
@@ -115,6 +138,7 @@ public class RL_Agent : Agent
             oppChar.StopAllCoroutines();
             oppChar.ResetBlockStatus();
             oppChar.enabled = true;
+
             Animator oppAnim = opponentAgent.character.GetComponentInChildren<Animator>();
             if (oppAnim != null)
             {
@@ -122,17 +146,17 @@ public class RL_Agent : Agent
                 oppAnim.Update(0f);
                 oppAnim.Play("Idle");
             }
+
             if (!oppChar.IsEquipped())
                 oppChar.EquipWeapon();
         }
 
         lastDistance = Vector3.Distance(transform.position, opponentAgent.transform.position);
-
-        float x = Academy.Instance.EnvironmentParameters.GetWithDefault("agent_start_x", 0f);
-        float z = Academy.Instance.EnvironmentParameters.GetWithDefault("agent_start_z", 0f);
-        Vector3 randomStartPos = new Vector3(x, 10, z);
-        transform.position = StartLocation.position + randomStartPos;
-
+    }
+    IEnumerator UnlockMoveLater()
+    {
+        yield return new WaitForSeconds(0.2f);
+        characterRe.isResetting = false;
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -171,25 +195,32 @@ public class RL_Agent : Agent
         sensor.AddObservation(Mathf.Clamp01((Time.time - lastDodgeTime) / dodgeCooldownTime));    // 1 float
     }
 
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("Wall"))
+        {
+            Debug.Log($"{gameObject.name} collided with Wall!");
+
+            // 리워드 감점 및 에피소드 종료
+            AddReward(-10f); // 벽 충돌 패널티
+            EndEpisodeWithLog();
+
+            // 상대 에이전트도 함께 종료 (옵션)
+            if (opponentAgent != null)
+            {
+                opponentAgent.AddReward(+0.5f); // 상대가 우위
+                opponentAgent.EndEpisodeWithLog();
+            }
+        }
+    }
+
 
     public override void OnActionReceived(ActionBuffers actions)
     {
         episodeStepCount++;
 
-        if (!character.IsAlive())
-        {
-            SetReward(-1f);
-            opponentAgent.SetReward(opponentAgent.role == AgentRole.Attacker ? +1f : +0.2f);
+        SmoothRotateToOpponent();
 
-            totalReward = GetCumulativeReward();
-            rewardGiven = true;
-            opponentAgent.rewardGiven = true;
-
-            LogEpisode();
-            EndEpisode();
-            opponentAgent.EndEpisode();
-            return;
-        }
         float distance = Vector3.Distance(transform.position, opponentAgent.transform.position);
 
         // ✅ 점진적 거리 보상 (Attacker는 가까울수록, Defender는 멀수록 보상)
@@ -235,77 +266,40 @@ public class RL_Agent : Agent
 
         lastDistance = distance;
 
-
-        // ✅ 공격 쿨타임 및 보상
-        if (Time.time - lastAttackTime >= attackCooldownTime)
-        {
-            if (character.TryAttack())
-            {
-                lastAttackTime = Time.time;
-                timeSinceLastAttackAttempt = 0f;
-                AddReward(+1.0f);  // 공격 시도에 대한 소형 보상
-            }
-        }
-
-        // ✅ 방어 쿨타임 및 보상
-        if (Time.time - lastDefendTime >= defendCooldownTime)
-        {
-            if (character.TryDefend())
-            {
-                lastDefendTime = Time.time;
-                AddReward(role == AgentRole.Defender ? +2f : +0.1f);
-            }
-        }
-
-        // ✅ 회피 쿨타임 및 보상
-        if (Time.time - lastDodgeTime >= dodgeCooldownTime && role == AgentRole.Defender)
-        {
-            Vector3 dodgeDir = transform.position - opponentAgent.transform.position;
-            if (character.TryDodge(dodgeDir))
-            {
-                lastDodgeTime = Time.time;
-                AddReward(+0.5f);
-            }
-        }
-
         // ✅ 시간 초과 시 종료
         if (Time.time - episodeStartTime >= maxEpisodeTime)
         {
-            SetReward(role == AgentRole.Defender ? +1.0f : -0.5f);
+            AddReward(role == AgentRole.Defender ? +1.0f : -0.5f);
             EndEpisodeWithLog();
+            Debug.Log("Time Elasped");
             return;
         }
 
         // ✅ 사망 또는 낙하 시 종료
-        if (!rewardGiven && (!character.IsAlive() || !opponentAgent.character.IsAlive()) || this.transform.position.y < -5)
+        if (!rewardGiven && (!character.IsAlive() || !opponentAgent.character.IsAlive() || transform.position.y < -5))
         {
             bool selfDied = !character.IsAlive();
-            if (selfDied)
-            {
-                SetReward(-50f);        // 상대는 역할에 따라 보상
-                if (opponentAgent.role == AgentRole.Attacker)
-                {
-                    opponentAgent.SetReward(+25f);  // 공격 성공
-                }
-                else
-                {
-                    opponentAgent.SetReward(+5f);   // 방어 잘함
-                }
-                Debug.Log(this.name + " Died");
-            }
-            else
-            {
-                SetReward(role == AgentRole.Attacker ? +25f : +5f);  // 나의 공격 성공
-                opponentAgent.SetReward(-30f);  // 죽은 쪽은 패널티
-            }
-            if (this.transform.position.y < -5)
+            bool oppDied = !opponentAgent.character.IsAlive();
+
+            if (transform.position.y < -5)
             {
                 SetReward(-1000f);
+            }
+            else if (selfDied)
+            {
+                SetReward(-50f);
+                opponentAgent.SetReward(opponentAgent.role == AgentRole.Attacker ? +25f : +5f);
+            }
+            else if (oppDied)
+            {
+                SetReward(role == AgentRole.Attacker ? +25f : +5f);
+                opponentAgent.SetReward(-30f);
             }
 
             EndEpisodeWithLog();
             return;
         }
+
 
         // ✅ 이동 처리
         int move = actions.DiscreteActions[0];
@@ -325,19 +319,32 @@ public class RL_Agent : Agent
             case 4: dir = Vector3.right; break;
         }
         character.Move(dir);
+        SmoothRotateToOpponent();
 
         // ✅ 행동 처리
         // 공격 및 방어 처리
         switch (act)
         {
             case 1: // 공격
+                attackAttempts++;
                 if (distance < 3.0f)  // 공격 범위 체크
                 {
-                    character.TurnTo(opponentAgent.transform.position);
-                    if (character.TryAttack())
+                    // ✅ 공격 쿨타임 및 보상
+                    if (Time.time - lastAttackTime >= attackCooldownTime)
                     {
-                        AddReward(+1.0f);
-                        timeSinceLastAttackAttempt = 0f;
+                        if (character.TryAttack())
+                        {
+                            attackSuccesses++;
+                            lastAttackTime = Time.time;
+                            if (opponentAgent.role == AgentRole.Attacker)
+                            {
+                                opponentAgent.SetReward(+5f);  // 공격 성공
+                            }
+                            else
+                            {
+                                opponentAgent.SetReward(+1f);   // 방어 잘함
+                            }
+                        }
                     }
                 }
                 else
@@ -347,11 +354,25 @@ public class RL_Agent : Agent
                 break;
 
             case 2: // 방어
+                defendAttempts++;
                 if (distance < 3.0f)  // 공격 받을 수 있는 거리에서만 방어
                 {
-                    if (character.TryDefend())
+                    // ✅ 방어 쿨타임 및 보상
+                    if (Time.time - lastDefendTime >= defendCooldownTime)
                     {
-                        AddReward(role == AgentRole.Defender ? +2.0f : +0.1f);
+                        if (character.TryDefend())
+                        {
+                            defendSuccesses++;
+                            lastDefendTime = Time.time;
+                            if (opponentAgent.role == AgentRole.Attacker)
+                            {
+                                opponentAgent.SetReward(+1f);  
+                            }
+                            else
+                            {
+                                opponentAgent.SetReward(+5f);
+                            }
+                        }
                     }
                 }
                 else
@@ -359,9 +380,28 @@ public class RL_Agent : Agent
                     AddReward(-0.1f); // 불필요한 방어 시도는 감점
                 }
                 break;
+            case 3:
+                // ✅ 회피 쿨타임 및 보상
+                if (Time.time - lastDodgeTime >= dodgeCooldownTime && role == AgentRole.Defender)
+                {
+                    dodgeAttempts++;
+                    Vector3 dodgeDir = transform.position - opponentAgent.transform.position;
+                    if (character.TryDodge(dodgeDir))
+                    {
+                        lastDodgeTime = Time.time;
+                        if (opponentAgent.role == AgentRole.Attacker)
+                        {
+                            opponentAgent.SetReward(+1f);  // 공격 성공
+                        }
+                        else
+                        {
+                            opponentAgent.SetReward(+3f);   // 방어 잘함
+                        }
+                    }
+                }
+                break;
         }
-
-
+/*
         // ✅ 상태 강제 초기화
         if (character.IsAttacking() && Time.time - lastAttackTime > 1.0f)
             character.isAttacking = false;
@@ -373,11 +413,11 @@ public class RL_Agent : Agent
         {
             var f = typeof(CharacterAction).GetField("isDodging", BindingFlags.NonPublic | BindingFlags.Instance);
             f?.SetValue(character, false);
-        }
+        }*/
 
         if (character.IsEquipping() && Time.time - equipStartTime > 1.0f)
         {
-            var f = typeof(CharacterAction).GetField("isEquipping", BindingFlags.NonPublic | BindingFlags.Instance);
+            var f = typeof(CharacterAction_Re).GetField("isEquipping", BindingFlags.NonPublic | BindingFlags.Instance);
             f?.SetValue(character, false);
         }
     }
@@ -393,6 +433,20 @@ public class RL_Agent : Agent
         opponentAgent.EndEpisode();
     }
 
+    private void SmoothRotateToOpponent()
+    {
+        if (opponentAgent == null) return;
+
+        Vector3 direction = opponentAgent.transform.position - transform.position;
+        direction.y = 0; // 수평 회전만
+
+        if (direction.magnitude < 0.01f) return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        float rotationSpeed = 5f;  // 회전 속도 (조절 가능)
+
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime * 100f);
+    }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
@@ -407,19 +461,31 @@ public class RL_Agent : Agent
         if (Input.GetKey(KeyCode.J)) d[1] = 1;
         else if (Input.GetKey(KeyCode.K)) d[1] = 2;
     }
-
-    private void LogEpisode()
+    private string GetLogFilePath()
     {
         if (!Directory.Exists(logDir))
             Directory.CreateDirectory(logDir);
 
-        if (!headerWritten && !File.Exists(logFilePath))
+        string agentName = gameObject.name; // 예: "Player1" 또는 "Player2"
+        return Path.Combine(logDir, $"{agentName}_log.csv");
+    }
+
+    private void LogEpisode()
+    {
+        string logFilePath = GetLogFilePath();
+
+        if (!File.Exists(logFilePath))
         {
-            File.AppendAllText(logFilePath, "AgentName,Episode,StepCount,Reward,EndTime,Duration,IsDead\n");
-            headerWritten = true;
+            File.AppendAllText(logFilePath,
+                "AgentName,Role,Episode,StepCount,Reward,AttackAttempts,AttackSuccesses,DefendAttempts,DefendSuccesses,DodgeAttempts,EndTime,Duration,IsDead\n");
         }
 
-        string logLine = $"{gameObject.name},{episodeCount},{episodeStepCount},{totalReward:F2},{Time.time:F2},{Time.time - episodeStartTime:F2},{!character.IsAlive()}\n";
+        string roleStr = role.ToString();
+        string logLine = $"{gameObject.name},{roleStr},{episodeCount},{episodeStepCount},{totalReward:F2}," +
+                         $"{attackAttempts},{attackSuccesses},{defendAttempts},{defendSuccesses},{dodgeAttempts}," +
+                         $"{Time.time:F2},{Time.time - episodeStartTime:F2},{!character.IsAlive()}\n";
+
         File.AppendAllText(logFilePath, logLine);
     }
+
 }

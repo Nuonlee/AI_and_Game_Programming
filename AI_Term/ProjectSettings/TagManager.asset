@@ -7,6 +7,9 @@ TagManager:
   - Player1
   - Player2
   - Attack
+  - Attack2
+  - Attack1
+  - Wall
   layers:
   - Default
   - TransparentFX
@@ -14,7 +17,7 @@ TagManager:
   - Weapon
   - Water
   - UI
-  - 
+  - Wall
   - 
   - 
   - 

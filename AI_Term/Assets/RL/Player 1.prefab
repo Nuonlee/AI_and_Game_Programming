@@ -1070,8 +1070,8 @@ GameObject:
   - component: {fileID: 5868700999769671885}
   - component: {fileID: 4313151968868351589}
   - component: {fileID: 5260528374873655650}
-  - component: {fileID: 1992974043820899795}
-  - component: {fileID: 2950097668428118103}
+  - component: {fileID: -1747892973935150655}
+  - component: {fileID: 2881249961545474950}
   - component: {fileID: 2528607049704550690}
   - component: {fileID: 4665526475766026460}
   - component: {fileID: 4325347291328491981}
@@ -1196,8 +1196,13 @@ MonoBehaviour:
   StartLocation: {fileID: 0}
   moveSpeed: 2
   attackRange: 2
+  attackCooldownTime: 2
+  defendCooldownTime: 2
+  dodgeCooldownTime: 5
+  alive: 1
   role: 1
---- !u!114 &1992974043820899795
+  maxEpisodeTime: 60
+--- !u!114 &-1747892973935150655
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1206,16 +1211,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 2503523354103726620}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18d8be6fc24d1754a9e5328233477952, type: 3}
+  m_Script: {fileID: 11500000, guid: a122c184c94c99d4f8ca15ed66b22bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentStatus: {fileID: 2950097668428118103}
+  agentStatus: {fileID: 2881249961545474950}
   sword: {fileID: 8245696868375482292}
-  swordOnShoulder: {fileID: 8956690131547947794}
-  swordCollider: {fileID: 8121987998190480183}
+  swordOnShoulder: {fileID: 5694412272997090472}
+  swordCollider: {fileID: 0}
   speed: 5
+  rotationSpeed: 10
   isAttacking: 0
---- !u!114 &2950097668428118103
+  isResetting: 0
+--- !u!114 &2881249961545474950
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1224,7 +1231,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2503523354103726620}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00af8fdb1c95aeb409fd2c0615b63e1f, type: 3}
+  m_Script: {fileID: 11500000, guid: a9fb62f2f44ee9c41b398f655abb2c2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100

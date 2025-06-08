@@ -2769,8 +2769,8 @@ GameObject:
   - component: {fileID: 4015478821449929675}
   - component: {fileID: 7991889404071572747}
   - component: {fileID: 892275030246296549}
-  - component: {fileID: 3612368351428297218}
-  - component: {fileID: 7144507585493392233}
+  - component: {fileID: 5344748265362020396}
+  - component: {fileID: -2552759381094766861}
   - component: {fileID: 530289173612857994}
   - component: {fileID: 5550153102094049677}
   - component: {fileID: 2188777992026910245}
@@ -2895,8 +2895,13 @@ MonoBehaviour:
   StartLocation: {fileID: 0}
   moveSpeed: 2
   attackRange: 2
+  attackCooldownTime: 2
+  defendCooldownTime: 2
+  dodgeCooldownTime: 5
+  alive: 1
   role: 1
---- !u!114 &3612368351428297218
+  maxEpisodeTime: 60
+--- !u!114 &5344748265362020396
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2905,16 +2910,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 4308918624469264804}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 18d8be6fc24d1754a9e5328233477952, type: 3}
+  m_Script: {fileID: 11500000, guid: a122c184c94c99d4f8ca15ed66b22bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentStatus: {fileID: 7144507585493392233}
+  agentStatus: {fileID: -2552759381094766861}
   sword: {fileID: 1870523573574534078}
   swordOnShoulder: {fileID: 4454010921231174776}
   swordCollider: {fileID: 0}
   speed: 5
+  rotationSpeed: 10
   isAttacking: 0
---- !u!114 &7144507585493392233
+  isResetting: 0
+--- !u!114 &-2552759381094766861
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -2923,14 +2930,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 4308918624469264804}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 00af8fdb1c95aeb409fd2c0615b63e1f, type: 3}
+  m_Script: {fileID: 11500000, guid: a9fb62f2f44ee9c41b398f655abb2c2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
   currentHealth: 100
   attackDamage: 10
   attackCooldown: 2.5
-  defendCooldown: 2
+  defendCooldown: 2.5
   dodgeCooldown: 5
   lastAttackTime: 0
   lastDefendTime: 0
