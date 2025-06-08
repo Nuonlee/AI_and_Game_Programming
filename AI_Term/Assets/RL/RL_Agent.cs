@@ -306,7 +306,7 @@ public class RL_Agent : Agent
             bool selfDied = !character.IsAlive();
             if (selfDied)
             {
-                SetReward(-50f);
+                AddReward(-50f);
                 if (opponentAgent.role == AgentRole.Attacker)
                     opponentAgent.SetReward(+25f);
                 else
@@ -322,7 +322,7 @@ public class RL_Agent : Agent
 
             if (this.transform.position.y < -5)
             {
-                SetReward(-1000f);
+                AddReward(-1000f);
             }
 
             EndEpisodeWithLog();

@@ -2,7 +2,7 @@
     "name": "root",
     "metadata": {
         "timer_format_version": "0.1.0",
-        "start_time_seconds": "1749365579",
+        "start_time_seconds": "1749367480",
         "python_version": "3.10.12 (main, Jul  5 2023, 18:54:27) [GCC 11.2.0]",
         "command_line_arguments": "/home/pathfinder/miniconda3/envs/mlagents/bin/mlagents-learn Assets/RL/config/trainer_config.yaml --run-id=v0 --force",
         "mlagents_version": "1.1.0",
@@ -10,31 +10,31 @@
         "communication_protocol_version": "1.5.0",
         "pytorch_version": "2.2.2+cu121",
         "numpy_version": "1.23.5",
-        "end_time_seconds": "1749365639"
+        "end_time_seconds": "1749367545"
     },
-    "total": 60.19632792999619,
+    "total": 60.127099803999954,
     "count": 1,
-    "self": 0.01039600399963092,
+    "self": 0.009167446999981621,
     "children": {
         "run_training.setup": {
-            "total": 0.01922505199763691,
+            "total": 0.04719828800000414,
             "count": 1,
-            "self": 0.01922505199763691
+            "self": 0.04719828800000414
         },
         "TrainerController.start_learning": {
-            "total": 60.16670687399892,
+            "total": 60.07073406899997,
             "count": 1,
-            "self": 0.0010621299952617846,
+            "self": 0.001018284999986463,
             "children": {
                 "TrainerController._reset_env": {
-                    "total": 60.1656226060004,
+                    "total": 60.06968123399997,
                     "count": 1,
-                    "self": 60.1656226060004
+                    "self": 60.06968123399997
                 },
                 "TrainerController._save_models": {
-                    "total": 2.2138003259897232e-05,
+                    "total": 3.455000000940345e-05,
                     "count": 1,
-                    "self": 2.2138003259897232e-05
+                    "self": 3.455000000940345e-05
                 }
             }
         }
