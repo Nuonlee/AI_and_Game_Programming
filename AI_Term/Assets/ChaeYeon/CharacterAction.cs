@@ -246,7 +246,7 @@ public class CharacterAction : MonoBehaviour
         anim.SetTrigger("doBlock");
         agentStatus.UseDefend();
 
-        Invoke(nameof(ResetDefend), 0.5f);
+      //  Invoke(nameof(ResetDefend), 0.5f);
 
         return true;
     }

@@ -12,12 +12,9 @@ public class BTAgent_Defensive : BTAgentBase
 
         float attackRange = 1.75f;
         // ─────────────────── 조건 노드 ───────────────────
-        var isLowHP = new IsLowHealth(character, 30f);
-        var canAttack = new CanAttack(character);
         var canDefend = new CanDefend(character);
         var canDodge = new CanDodge(character);
         var isEnemyClose = new IsEnemyInRange(character, character.transform, enemy, attackRange);
-        var isEnemyNotFar = new IsEnemyInRange(character, character.transform, enemy, 6f);
         var isEnemyAttacking = new IsEnemyAttacking(enemy); // 적군이 공격중일 경우
         var wasBlockSuccessful = new WasBlockSuccessful(character);
 
