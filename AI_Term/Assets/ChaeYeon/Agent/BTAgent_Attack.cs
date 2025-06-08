@@ -25,33 +25,16 @@ public class BTAgent_Attack : BTAgentBase
         // ─────────────────── 행동 노드 ───────────────────
         var defend = new DefendAction(character, enemy);
         var attack = new AttackAction(character, enemy);
-        var dodge = new DodgeAction(character, character.transform, enemy);
         var moveToEnemy = new MoveToEnemy(character, character.transform, enemy, attackRange);
         var dashToPlayer = new DashAction(character, character.transform, enemy, 7f);
-  
+        var dodge = new DodgeAction(character, character.transform, enemy);
 
         // ─────────────────── 시퀀스 노드 ───────────────────
-        var attackSeq = new Sequence(new List<Node> {
-            isEnemyInAttackRange,
-            canAttack,
-            attack
-        });
-
-        var chaseSeq = new Sequence(new List<Node> {
-            isEnemyFar,
-            moveToEnemy
-        });
-
-        var dashSeq = new Sequence(new List<Node> {
-            isEnemyTooFar,
-            dashToPlayer
-        });
-
-        var defendSeq = new Sequence(new List<Node> {
-            isLowHP,
-            canDefend,
-            defend
-        });
+        var attackSeq = new Sequence(new List<Node> { isEnemyInAttackRange, canAttack, attack });
+        var chaseSeq = new Sequence(new List<Node> { isEnemyFar, moveToEnemy });
+        var dashSeq = new Sequence(new List<Node> { isEnemyTooFar, dashToPlayer });
+        var defendSeq = new Sequence(new List<Node> { isLowHP, canDefend, defend });
+        var dodgeSeq = new Sequence(new List<Node> { isLowHP, canDodge, dodge });
 
         // ─────────────────── 트리 구성 ───────────────────
 
@@ -59,9 +42,10 @@ public class BTAgent_Attack : BTAgentBase
             new IsEnemyAlive(enemy),   // 적이 죽었을 경우 밑의 행동 노드 실행 안 됨
             new Selector(new List<Node> {
                 attackSeq,
-                defendSeq,
-                dashSeq,
                 chaseSeq,
+                defendSeq,
+                dodgeSeq,
+               // dashSeq,
             })
         });
 
