@@ -1,0 +1,111 @@
+{
+    "agent_start_x": {
+        "lesson_num": 0
+    },
+    "agent_start_z": {
+        "lesson_num": 0
+    },
+    "Player1": {
+        "checkpoints": [
+            {
+                "steps": 999906,
+                "file_path": "results\\june_11\\Player1\\Player1-999906.onnx",
+                "reward": 92.81914118097887,
+                "creation_time": 1749323107.921918,
+                "auxillary_file_paths": [
+                    "results\\june_11\\Player1\\Player1-999906.pt"
+                ]
+            },
+            {
+                "steps": 1999991,
+                "file_path": "results\\june_11\\Player1\\Player1-1999991.onnx",
+                "reward": 98.55750381946564,
+                "creation_time": 1749323953.8162434,
+                "auxillary_file_paths": [
+                    "results\\june_11\\Player1\\Player1-1999991.pt"
+                ]
+            },
+            {
+                "steps": 2999918,
+                "file_path": "results\\june_11\\Player1\\Player1-2999918.onnx",
+                "reward": 144.9333778931981,
+                "creation_time": 1749324824.795056,
+                "auxillary_file_paths": [
+                    "results\\june_11\\Player1\\Player1-2999918.pt"
+                ]
+            },
+            {
+                "steps": 3000160,
+                "file_path": "results\\june_11\\Player1\\Player1-3000160.onnx",
+                "reward": 143.84529738370762,
+                "creation_time": 1749324824.916449,
+                "auxillary_file_paths": [
+                    "results\\june_11\\Player1\\Player1-3000160.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 3000160,
+            "file_path": "results\\june_11\\Player1.onnx",
+            "reward": 143.84529738370762,
+            "creation_time": 1749324824.916449,
+            "auxillary_file_paths": [
+                "results\\june_11\\Player1\\Player1-3000160.pt"
+            ]
+        }
+    },
+    "Player2": {
+        "checkpoints": [
+            {
+                "steps": 999906,
+                "file_path": "results\\june_11\\Player2\\Player2-999906.onnx",
+                "reward": 427.85261368751526,
+                "creation_time": 1749323107.9848506,
+                "auxillary_file_paths": [
+                    "results\\june_11\\Player2\\Player2-999906.pt"
+                ]
+            },
+            {
+                "steps": 1999991,
+                "file_path": "results\\june_11\\Player2\\Player2-1999991.onnx",
+                "reward": 387.4514489720265,
+                "creation_time": 1749323953.8783123,
+                "auxillary_file_paths": [
+                    "results\\june_11\\Player2\\Player2-1999991.pt"
+                ]
+            },
+            {
+                "steps": 2999918,
+                "file_path": "results\\june_11\\Player2\\Player2-2999918.onnx",
+                "reward": 971.9925756000337,
+                "creation_time": 1749324824.8590062,
+                "auxillary_file_paths": [
+                    "results\\june_11\\Player2\\Player2-2999918.pt"
+                ]
+            },
+            {
+                "steps": 3000160,
+                "file_path": "results\\june_11\\Player2\\Player2-3000160.onnx",
+                "reward": 960.4432551361793,
+                "creation_time": 1749324824.9796557,
+                "auxillary_file_paths": [
+                    "results\\june_11\\Player2\\Player2-3000160.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 3000160,
+            "file_path": "results\\june_11\\Player2.onnx",
+            "reward": 960.4432551361793,
+            "creation_time": 1749324824.9796557,
+            "auxillary_file_paths": [
+                "results\\june_11\\Player2\\Player2-3000160.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.7.0+cpu"
+    }
+}

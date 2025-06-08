@@ -1,0 +1,51 @@
+{
+    "Player2": {
+        "checkpoints": [
+            {
+                "steps": 21568,
+                "file_path": "results\\dual-agent-run\\Player2\\Player2-21568.onnx",
+                "reward": null,
+                "creation_time": 1749060134.1662772,
+                "auxillary_file_paths": [
+                    "results\\dual-agent-run\\Player2\\Player2-21568.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 21568,
+            "file_path": "results\\dual-agent-run\\Player2.onnx",
+            "reward": null,
+            "creation_time": 1749060134.1662772,
+            "auxillary_file_paths": [
+                "results\\dual-agent-run\\Player2\\Player2-21568.pt"
+            ]
+        }
+    },
+    "Player1": {
+        "checkpoints": [
+            {
+                "steps": 21568,
+                "file_path": "results\\dual-agent-run\\Player1\\Player1-21568.onnx",
+                "reward": null,
+                "creation_time": 1749060134.2226553,
+                "auxillary_file_paths": [
+                    "results\\dual-agent-run\\Player1\\Player1-21568.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 21568,
+            "file_path": "results\\dual-agent-run\\Player1.onnx",
+            "reward": null,
+            "creation_time": 1749060134.2226553,
+            "auxillary_file_paths": [
+                "results\\dual-agent-run\\Player1\\Player1-21568.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.7.0+cpu"
+    }
+}

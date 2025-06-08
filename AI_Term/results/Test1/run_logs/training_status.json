@@ -1,0 +1,65 @@
+{
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.7.0+cpu"
+    },
+    "RL_Agent": {
+        "checkpoints": [
+            {
+                "steps": 0,
+                "file_path": "results\\Test1\\RL_Agent\\RL_Agent-0.onnx",
+                "reward": null,
+                "creation_time": 1749053081.901402,
+                "auxillary_file_paths": [
+                    "results\\Test1\\RL_Agent\\RL_Agent-0.pt"
+                ]
+            },
+            {
+                "steps": 5295,
+                "file_path": "results\\Test1\\RL_Agent\\RL_Agent-5295.onnx",
+                "reward": 0.18571430551154272,
+                "creation_time": 1749055968.3433805,
+                "auxillary_file_paths": [
+                    "results\\Test1\\RL_Agent\\RL_Agent-5295.pt"
+                ]
+            },
+            {
+                "steps": 46627,
+                "file_path": "results\\Test1\\RL_Agent\\RL_Agent-46627.onnx",
+                "reward": null,
+                "creation_time": 1749056502.405872,
+                "auxillary_file_paths": [
+                    "results\\Test1\\RL_Agent\\RL_Agent-46627.pt"
+                ]
+            },
+            {
+                "steps": 46883,
+                "file_path": "results\\Test1\\RL_Agent\\RL_Agent-46883.onnx",
+                "reward": null,
+                "creation_time": 1749056780.9441943,
+                "auxillary_file_paths": [
+                    "results\\Test1\\RL_Agent\\RL_Agent-46883.pt"
+                ]
+            },
+            {
+                "steps": 47257,
+                "file_path": "results\\Test1\\RL_Agent\\RL_Agent-47257.onnx",
+                "reward": 0.350000012665987,
+                "creation_time": 1749058341.6555738,
+                "auxillary_file_paths": [
+                    "results\\Test1\\RL_Agent\\RL_Agent-47257.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 47257,
+            "file_path": "results\\Test1\\RL_Agent.onnx",
+            "reward": 0.350000012665987,
+            "creation_time": 1749058341.6555738,
+            "auxillary_file_paths": [
+                "results\\Test1\\RL_Agent\\RL_Agent-47257.pt"
+            ]
+        }
+    }
+}
