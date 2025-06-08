@@ -56,7 +56,7 @@ public class AgentStatus_Re : MonoBehaviour
     public void TakeDamage(float damage)
     {
         if (isInvincible || isDead) return;
-
+        StartInvincibility();
         if (isDefending)
         {
             Debug.Log(this.gameObject.name + " 방어했어요 ;;;");
