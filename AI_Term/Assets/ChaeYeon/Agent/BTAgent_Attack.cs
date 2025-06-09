@@ -39,13 +39,12 @@ public class BTAgent_Attack : BTAgentBase
         // ─────────────────── 트리 구성 ───────────────────
 
         root = new Sequence(new List<Node> {
-            new IsEnemyAlive(enemy),   // 적이 죽었을 경우 밑의 행동 노드 실행 안 됨
+            new IsEnemyAlive(enemy), 
             new Selector(new List<Node> {
                 attackSeq,
                 chaseSeq,
                 defendSeq,
                 dodgeSeq,
-               // dashSeq,
             })
         });
 

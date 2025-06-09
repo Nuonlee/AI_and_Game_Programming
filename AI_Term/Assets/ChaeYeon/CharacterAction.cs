@@ -201,7 +201,9 @@ public class CharacterAction : MonoBehaviour
 
     public void CounterAttack()  // 수비 에이전트 반격용
     {
-       // StopMove();
+        // StopMove();
+        isDefending = false;
+        agentStatus.isDefending = false;
 
         if (!IsAlive() || isEquipping || isDodging)
         {
